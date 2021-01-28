@@ -21,8 +21,10 @@ import static com.opengamma.strata.loader.csv.TradeCsvLoader.BUY_SELL_FIELD;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.opengamma.strata.basics.currency.Currency;
 import com.opengamma.strata.basics.currency.CurrencyAmount;
 import com.opengamma.strata.collect.io.CsvOutput.CsvRowOutputWithHeaders;
@@ -38,16 +40,39 @@ import com.opengamma.strata.product.SecurityPosition;
 import com.opengamma.strata.product.SecurityPriceInfo;
 import com.opengamma.strata.product.SecurityQuantityTrade;
 import com.opengamma.strata.product.SecurityTrade;
+import com.opengamma.strata.product.Trade;
 import com.opengamma.strata.product.TradeInfo;
 import com.opengamma.strata.product.common.BuySell;
 
 /**
  * Handles the CSV file format for security trades.
  */
-final class SecurityCsvPlugin {
+final class SecurityCsvPlugin implements TradeCsvParserPlugin {
 
+  /**
+   * The singleton instance of the plugin.
+   */
+  public static final SecurityCsvPlugin INSTANCE = new SecurityCsvPlugin();
+
+  //-------------------------------------------------------------------------
+  @Override
+  public Set<String> types() {
+    return ImmutableSet.of("SECURITY");
+  }
+
+  @Override
+  public Trade parseTrade(CsvRow row, List<CsvRow> additionalRows, TradeInfo info, TradeCsvInfoResolver resolver) {
+    return resolver.parseSecurityTrade(row, info);
+  }
+
+  @Override
+  public String getName() {
+    return "Security";
+  }
+
+  //-------------------------------------------------------------------------
   // parses a trade from the CSV row
-  static SecurityQuantityTrade parseTrade(CsvRow row, TradeInfo info, TradeCsvInfoResolver resolver) {
+  static SecurityQuantityTrade parseTradeWithPriceInfo(CsvRow row, TradeInfo info, TradeCsvInfoResolver resolver) {
     SecurityTrade trade = parseSecurityTrade(row, info, resolver);
     SecurityTrade base = resolver.completeTrade(row, trade);
 

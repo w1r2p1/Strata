@@ -30,14 +30,17 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.opengamma.strata.basics.currency.AdjustablePayment;
 import com.opengamma.strata.basics.currency.CurrencyAmount;
 import com.opengamma.strata.basics.date.AdjustableDate;
 import com.opengamma.strata.collect.io.CsvOutput.CsvRowOutputWithHeaders;
 import com.opengamma.strata.collect.io.CsvRow;
 import com.opengamma.strata.loader.LoaderUtils;
+import com.opengamma.strata.product.Trade;
 import com.opengamma.strata.product.TradeInfo;
 import com.opengamma.strata.product.common.LongShort;
 import com.opengamma.strata.product.common.PayReceive;
@@ -49,7 +52,7 @@ import com.opengamma.strata.product.fxopt.FxVanillaOptionTrade;
 /**
  * Handles the CSV file format for FX vanilla option trades.
  */
-class FxVanillaOptionTradeCsvPlugin implements TradeTypeCsvWriter<FxVanillaOptionTrade> {
+class FxVanillaOptionTradeCsvPlugin implements TradeCsvParserPlugin, TradeTypeCsvWriter<FxVanillaOptionTrade> {
 
   /**
    * The singleton instance of the plugin.
@@ -79,6 +82,22 @@ class FxVanillaOptionTradeCsvPlugin implements TradeTypeCsvWriter<FxVanillaOptio
       .add(PAYMENT_DATE_CNV_FIELD)
       .add(PAYMENT_DATE_CAL_FIELD)
       .build();
+
+  //-------------------------------------------------------------------------
+  @Override
+  public Set<String> types() {
+    return ImmutableSet.of("FXVANILLAOPTION", "FX VANILLA OPTION");
+  }
+
+  @Override
+  public Trade parseTrade(CsvRow row, List<CsvRow> additionalRows, TradeInfo info, TradeCsvInfoResolver resolver) {
+    return resolver.parseFxVanillaOptionTrade(row, info);
+  }
+
+  @Override
+  public String getName() {
+    return "FxVanillaOption";
+  }
 
   //-------------------------------------------------------------------------
   /**
